@@ -24,7 +24,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 
 resource "aws_lambda_function" "webhook_handler" {
   filename         = "${path.module}/../lambda/lambda.zip"
-  function_name    = "strava_webhook_lambda"
+  function_name    = "strava_webhook_lambda_v2"
   role             = aws_iam_role.lambda_exec.arn
   handler          = "handler.lambda_handler"
   runtime          = "python3.11"
@@ -50,10 +50,20 @@ resource "aws_apigatewayv2_route" "strava_route" {
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
+resource "aws_apigatewayv2_deployment" "strava_deployment" {
+  api_id     = aws_apigatewayv2_api.strava_api.id
+  description = "force deploy v1" # 👈 această linie forțează recrearea
+
+  depends_on = [
+    aws_apigatewayv2_route.strava_route
+  ]
+}
+
 resource "aws_apigatewayv2_stage" "default_stage" {
-  api_id      = aws_apigatewayv2_api.strava_api.id
-  name        = "prod"
-  auto_deploy = true
+  api_id        = aws_apigatewayv2_api.strava_api.id
+  name          = "prod"
+  deployment_id = aws_apigatewayv2_deployment.strava_deployment.id
+  auto_deploy   = false
 }
 
 resource "aws_lambda_permission" "apigw_lambda" {
