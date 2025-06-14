@@ -2,6 +2,10 @@ provider "aws" {
   region = "eu-central-1"
 }
 
+variable "client_id" {}
+variable "client_secret" {}
+variable "refresh_token" {}
+
 resource "aws_iam_role" "lambda_exec" {
   name = "lambda_exec_role"
 
@@ -31,9 +35,9 @@ resource "aws_lambda_function" "webhook_handler" {
   source_code_hash = filebase64sha256("${path.module}/../lambda/lambda.zip")
   environment {
     variables = {
-      CLIENT_ID     = "154711"
-      CLIENT_SECRET = "b648f436abaf31864476b81b3026c19d64acb046"
-      REFRESH_TOKEN = "6719399bfa51358a4fbfe00ff8dafc311eff5978"
+      CLIENT_ID     = var.client_id
+      CLIENT_SECRET = var.client_secret
+      REFRESH_TOKEN = var.refresh_token
     }
   }
 }
