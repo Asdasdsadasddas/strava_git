@@ -1,51 +1,15 @@
 {
   "version": 4,
   "terraform_version": "1.12.2",
-  "serial": 104,
+  "serial": 31,
   "lineage": "1b8090e2-399f-fe36-281c-729978254cbb",
   "outputs": {
     "invoke_url": {
-      "value": "https://7p0l78yhyc.execute-api.eu-central-1.amazonaws.com/webhook-strava",
+      "value": "https://9p3o90h78g.execute-api.eu-west-1.amazonaws.com/webhook-strava",
       "type": "string"
     }
   },
   "resources": [
-    {
-      "mode": "managed",
-      "type": "aws_apigatewayv2_api",
-      "name": "strava_api",
-      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
-      "instances": [
-        {
-          "schema_version": 0,
-          "attributes": {
-            "api_endpoint": "https://7p0l78yhyc.execute-api.eu-central-1.amazonaws.com",
-            "api_key_selection_expression": "$request.header.x-api-key",
-            "arn": "arn:aws:apigateway:eu-central-1::/apis/7p0l78yhyc",
-            "body": null,
-            "cors_configuration": [],
-            "credentials_arn": null,
-            "description": "",
-            "disable_execute_api_endpoint": false,
-            "execution_arn": "arn:aws:execute-api:eu-central-1:975049934922:7p0l78yhyc",
-            "fail_on_warnings": null,
-            "id": "7p0l78yhyc",
-            "ip_address_type": "ipv4",
-            "name": "strava-api",
-            "protocol_type": "HTTP",
-            "route_key": null,
-            "route_selection_expression": "$request.method $request.path",
-            "tags": null,
-            "tags_all": {},
-            "target": null,
-            "version": ""
-          },
-          "sensitive_attributes": [],
-          "identity_schema_version": 0,
-          "private": "bnVsbA=="
-        }
-      ]
-    },
     {
       "mode": "managed",
       "type": "aws_apigatewayv2_deployment",
@@ -55,10 +19,10 @@
         {
           "schema_version": 0,
           "attributes": {
-            "api_id": "7p0l78yhyc",
+            "api_id": "9p3o90h78g",
             "auto_deployed": false,
-            "description": "force redeploy-2025-06-14T12:53:37Z",
-            "id": "62z9bf",
+            "description": "force redeploy-2025-06-14T12:26:43Z",
+            "id": "i243q2",
             "triggers": null
           },
           "sensitive_attributes": [],
@@ -83,22 +47,22 @@
         {
           "schema_version": 0,
           "attributes": {
-            "api_id": "7p0l78yhyc",
+            "api_id": "9p3o90h78g",
             "connection_id": "",
             "connection_type": "INTERNET",
             "content_handling_strategy": "",
             "credentials_arn": "",
             "description": "",
-            "id": "44hjoln",
+            "id": "of4mdr6",
             "integration_method": "POST",
             "integration_response_selection_expression": "",
             "integration_subtype": "",
             "integration_type": "AWS_PROXY",
-            "integration_uri": "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:975049934922:function:strava_webhook_lambda/invocations",
+            "integration_uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:975049934922:function:strava_webhook_lambda/invocations",
             "passthrough_behavior": "",
             "payload_format_version": "2.0",
-            "request_parameters": null,
-            "request_templates": null,
+            "request_parameters": {},
+            "request_templates": {},
             "response_parameters": [],
             "template_selection_expression": "",
             "timeout_milliseconds": 30000,
@@ -124,19 +88,19 @@
         {
           "schema_version": 0,
           "attributes": {
-            "api_id": "7p0l78yhyc",
+            "api_id": "9p3o90h78g",
             "api_key_required": false,
-            "authorization_scopes": null,
+            "authorization_scopes": [],
             "authorization_type": "NONE",
             "authorizer_id": "",
-            "id": "7e3unwq",
+            "id": "h48hw1i",
             "model_selection_expression": "",
             "operation_name": "",
-            "request_models": null,
+            "request_models": {},
             "request_parameter": [],
             "route_key": "POST /webhook-strava",
             "route_response_selection_expression": "",
-            "target": "integrations/44hjoln"
+            "target": "integrations/of4mdr6"
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
@@ -157,12 +121,11 @@
       "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
       "instances": [
         {
-          "status": "tainted",
           "schema_version": 0,
           "attributes": {
             "access_log_settings": [],
-            "api_id": "7p0l78yhyc",
-            "arn": "arn:aws:apigateway:eu-central-1::/apis/7p0l78yhyc/stages/prod",
+            "api_id": "9p3o90h78g",
+            "arn": "arn:aws:apigateway:eu-west-1::/apis/9p3o90h78g/stages/prod",
             "auto_deploy": false,
             "client_certificate_id": "",
             "default_route_settings": [
@@ -174,15 +137,15 @@
                 "throttling_rate_limit": 0
               }
             ],
-            "deployment_id": "62z9bf",
+            "deployment_id": "i243q2",
             "description": "",
-            "execution_arn": "arn:aws:execute-api:eu-central-1:975049934922:7p0l78yhyc/prod",
+            "execution_arn": "arn:aws:execute-api:eu-west-1:975049934922:9p3o90h78g/prod",
             "id": "prod",
-            "invoke_url": "https://7p0l78yhyc.execute-api.eu-central-1.amazonaws.com/prod",
+            "invoke_url": "https://9p3o90h78g.execute-api.eu-west-1.amazonaws.com/prod",
             "name": "prod",
             "route_settings": [],
-            "stage_variables": null,
-            "tags": null,
+            "stage_variables": {},
+            "tags": {},
             "tags_all": {}
           },
           "sensitive_attributes": [],
@@ -210,20 +173,22 @@
           "attributes": {
             "arn": "arn:aws:iam::975049934922:role/lambda_exec_role",
             "assume_role_policy": "{\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"}}],\"Version\":\"2012-10-17\"}",
-            "create_date": "2025-06-14T12:53:22Z",
+            "create_date": "2025-06-14T11:43:03Z",
             "description": "",
             "force_detach_policies": false,
             "id": "lambda_exec_role",
             "inline_policy": [],
-            "managed_policy_arns": [],
+            "managed_policy_arns": [
+              "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+            ],
             "max_session_duration": 3600,
             "name": "lambda_exec_role",
             "name_prefix": "",
             "path": "/",
             "permissions_boundary": "",
-            "tags": null,
+            "tags": {},
             "tags_all": {},
-            "unique_id": "AROA6GBMBJBFJENFJU24U"
+            "unique_id": "AROA6GBMBJBFOTKJ5T7S4"
           },
           "sensitive_attributes": [],
           "identity_schema_version": 0,
@@ -240,7 +205,7 @@
         {
           "schema_version": 0,
           "attributes": {
-            "id": "lambda_exec_role-20250614125322994800000001",
+            "id": "lambda_exec_role-20250614114303797600000001",
             "policy_arn": "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
             "role": "lambda_exec_role"
           },
@@ -265,7 +230,7 @@
             "architectures": [
               "x86_64"
             ],
-            "arn": "arn:aws:lambda:eu-central-1:975049934922:function:strava_webhook_lambda",
+            "arn": "arn:aws:lambda:eu-west-1:975049934922:function:strava_webhook_lambda",
             "code_sha256": "w7TZtsDslolyzcDkUqPoBgDmC+TWVfX71XlgSNgXcIQ=",
             "code_signing_config_arn": "",
             "dead_letter_config": [],
@@ -283,10 +248,10 @@
             "id": "strava_webhook_lambda",
             "image_config": [],
             "image_uri": "",
-            "invoke_arn": "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:975049934922:function:strava_webhook_lambda/invocations",
+            "invoke_arn": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:975049934922:function:strava_webhook_lambda/invocations",
             "kms_key_arn": "",
-            "last_modified": "2025-06-14T12:53:31.868+0000",
-            "layers": null,
+            "last_modified": "2025-06-14T12:25:05.608+0000",
+            "layers": [],
             "logging_config": [
               {
                 "application_log_level": "",
@@ -298,8 +263,8 @@
             "memory_size": 128,
             "package_type": "Zip",
             "publish": false,
-            "qualified_arn": "arn:aws:lambda:eu-central-1:975049934922:function:strava_webhook_lambda:$LATEST",
-            "qualified_invoke_arn": "arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:975049934922:function:strava_webhook_lambda:$LATEST/invocations",
+            "qualified_arn": "arn:aws:lambda:eu-west-1:975049934922:function:strava_webhook_lambda:$LATEST",
+            "qualified_invoke_arn": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:975049934922:function:strava_webhook_lambda:$LATEST/invocations",
             "replace_security_groups_on_destroy": null,
             "replacement_security_group_ids": null,
             "reserved_concurrent_executions": -1,
@@ -314,7 +279,7 @@
             "snap_start": [],
             "source_code_hash": "w7TZtsDslolyzcDkUqPoBgDmC+TWVfX71XlgSNgXcIQ=",
             "source_code_size": 216,
-            "tags": null,
+            "tags": {},
             "tags_all": {},
             "timeout": 3,
             "timeouts": null,
@@ -353,7 +318,7 @@
             "principal_org_id": null,
             "qualifier": "",
             "source_account": null,
-            "source_arn": "arn:aws:execute-api:eu-central-1:975049934922:7p0l78yhyc/*/*",
+            "source_arn": "arn:aws:execute-api:eu-west-1:975049934922:9p3o90h78g/*/*",
             "statement_id": "AllowAPIGatewayInvoke",
             "statement_id_prefix": ""
           },

@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-1" # sau regiunea ta preferată
+  region = "eu-central-1"
 }
 
 resource "aws_iam_role" "lambda_exec" {
@@ -24,7 +24,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 
 resource "aws_lambda_function" "webhook_handler" {
   filename         = "${path.module}/../lambda/lambda.zip"
-  function_name    = "strava_webhook_lambda_v2"
+  function_name    = "strava_webhook_lambda"
   role             = aws_iam_role.lambda_exec.arn
   handler          = "handler.lambda_handler"
   runtime          = "python3.11"
@@ -52,7 +52,7 @@ resource "aws_apigatewayv2_route" "strava_route" {
 
 resource "aws_apigatewayv2_deployment" "strava_deployment" {
   api_id     = aws_apigatewayv2_api.strava_api.id
-  description = "force deploy v1" # 👈 această linie forțează recrearea
+  description = "force redeploy-${timestamp()}"  # 👈 Asta forțează recreare
 
   depends_on = [
     aws_apigatewayv2_route.strava_route
