@@ -29,7 +29,15 @@ resource "aws_lambda_function" "webhook_handler" {
   handler          = "handler.lambda_handler"
   runtime          = "python3.11"
   source_code_hash = filebase64sha256("${path.module}/../lambda/lambda.zip")
+  environment {
+    variables = {
+      CLIENT_ID     = "154711"
+      CLIENT_SECRET = "b648f436abaf31864476b81b3026c19d64acb046"
+      REFRESH_TOKEN = "6719399bfa51358a4fbfe00ff8dafc311eff5978"
+    }
+  }
 }
+
 
 resource "aws_apigatewayv2_api" "strava_api" {
   name          = "strava-api"
@@ -46,7 +54,7 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
 
 resource "aws_apigatewayv2_route" "strava_route" {
   api_id    = aws_apigatewayv2_api.strava_api.id
-  route_key = "POST /webhook-strava"
+  route_key = "ANY /webhook-strava"
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
