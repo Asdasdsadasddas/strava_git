@@ -52,7 +52,8 @@ resource "aws_iam_policy" "lambda_dynamodb_policy" {
         Action   = [
           "dynamodb:PutItem",
           "dynamodb:UpdateItem",
-          "dynamodb:GetItem"
+          "dynamodb:GetItem",
+          "dynamodb:Scan"
         ],
         Resource = aws_dynamodb_table.activities.arn
       }
@@ -80,6 +81,7 @@ resource "aws_lambda_function" "webhook_handler" {
       CLIENT_SECRET = var.client_secret
       REFRESH_TOKEN = var.refresh_token
       TABLE_NAME    = aws_dynamodb_table.activities.name
+      STREAMS_BUCKET = aws_s3_bucket.strava_streams.bucket
     }
   }
 }
@@ -104,10 +106,25 @@ resource "aws_apigatewayv2_route" "strava_route" {
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
+resource "aws_apigatewayv2_route" "get_activity_route" {
+  api_id    = aws_apigatewayv2_api.strava_api.id
+  route_key = "GET /activities/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+}
+
+resource "aws_apigatewayv2_route" "get_activities_route" {
+  api_id    = aws_apigatewayv2_api.strava_api.id
+  route_key = "GET /activities"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+}
+
 resource "aws_apigatewayv2_deployment" "strava_deployment" {
   api_id      = aws_apigatewayv2_api.strava_api.id
   description = "force redeploy-${timestamp()}"
-  depends_on  = [aws_apigatewayv2_route.strava_route]
+  depends_on  = [
+    aws_apigatewayv2_route.strava_route,
+    aws_apigatewayv2_route.get_activity_route  # adaugat
+  ]
 }
 
 resource "aws_apigatewayv2_stage" "default_stage" {
@@ -123,4 +140,67 @@ resource "aws_lambda_permission" "apigw_lambda" {
   function_name = aws_lambda_function.webhook_handler.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.strava_api.execution_arn}/*/*"
+}
+
+resource "aws_s3_bucket" "strava_streams" {
+  bucket         = "strava-activity-streams-prod"
+  force_destroy  = true
+}
+
+resource "aws_iam_policy" "lambda_s3_put_streams" {
+  name   = "lambda-s3-streams-access"
+  path   = "/"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect   = "Allow",
+      Action   = ["s3:PutObject", "s3:GetObject"],
+      Resource = "${aws_s3_bucket.strava_streams.arn}/*"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_s3_permission" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = aws_iam_policy.lambda_s3_put_streams.arn
+}
+
+
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
+resource "aws_s3_bucket" "ui_bucket" {
+  bucket        = "strava-ui-${random_id.suffix.hex}"
+  force_destroy = true
+
+  tags = {
+    Name = "StravaUI"
+  }
+}
+
+resource "aws_s3_bucket_website_configuration" "ui_bucket_website" {
+  bucket = aws_s3_bucket.ui_bucket.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
+  }
+}
+
+resource "aws_s3_bucket_policy" "public_ui_policy" {
+  bucket = aws_s3_bucket.ui_bucket.id
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Sid       = "PublicReadGetObject",
+      Effect    = "Allow",
+      Principal = "*",
+      Action    = "s3:GetObject",
+      Resource  = "${aws_s3_bucket.ui_bucket.arn}/*"
+    }]
+  })
 }

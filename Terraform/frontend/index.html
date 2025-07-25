@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strava Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800">
+  <div class="max-w-4xl mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold mb-8 text-center text-orange-600">Activitățile tale Strava</h1>
+
+    <!-- Filtre -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+      <select id="typeFilter" class="p-2 rounded border w-full sm:w-auto">
+        <option value="">Toate tipurile</option>
+        <option value="Run">Run</option>
+        <option value="Ride">Bike</option>
+        <option value="Walk">Walk</option>
+        <option value="Swim">Swim</option>
+        <option value="VirtualRide">Virtual Ride</option>
+      </select>
+
+      <input type="date" id="dateFilter" class="p-2 rounded border w-full sm:w-auto" />
+
+      <select id="limitFilter" class="p-2 rounded border w-full sm:w-auto">
+        <option value="5">Ultimele 5</option>
+        <option value="10" selected>Ultimele 10</option>
+        <option value="20">Ultimele 20</option>
+      </select>
+    </div>
+
+    <!-- Activități -->
+    <div id="activitiesList" class="grid gap-6"></div>
+
+    <!-- Status -->
+    <div id="statusMessage" class="text-center text-red-600 mt-6 hidden"></div>
+  </div>
+
+  <script>
+    const API_URL = 'https://h35ja7q9hi.execute-api.eu-central-1.amazonaws.com/prod/activities';
+
+    const typeFilter = document.getElementById('typeFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const limitFilter = document.getElementById('limitFilter');
+    const activitiesList = document.getElementById('activitiesList');
+    const statusMessage = document.getElementById('statusMessage');
+
+    dateFilter.addEventListener('change', () => {
+      if (dateFilter.value) {
+        limitFilter.disabled = true;
+        limitFilter.classList.add('opacity-50');
+      } else {
+        limitFilter.disabled = false;
+        limitFilter.classList.remove('opacity-50');
+      }
+      fetchActivities();
+    });
+
+    typeFilter.addEventListener('change', fetchActivities);
+    limitFilter.addEventListener('change', fetchActivities);
+    window.addEventListener('DOMContentLoaded', fetchActivities);
+
+    async function fetchActivities() {
+      let url = new URL(API_URL);
+
+      if (typeFilter.value) url.searchParams.append('type', typeFilter.value);
+      if (dateFilter.value) {
+        url.searchParams.append('since', dateFilter.value);
+      } else {
+        url.searchParams.append('limit', limitFilter.value);
+      }
+
+      activitiesList.innerHTML = '<p class="text-center text-gray-500">Se încarcă activitățile...</p>';
+      statusMessage.classList.add('hidden');
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        activitiesList.innerHTML = '';
+
+        if (!Array.isArray(data) || data.length === 0) {
+          activitiesList.innerHTML = '<p class="text-center text-gray-500">Nicio activitate găsită.</p>';
+          return;
+        }
+        data.forEach(act => {
+          console.log("ACT DEBUG:", act);
+          const name = act.name || `Activitate #${act.strava_id || '-'}`;
+          const type = act.type || 'N/A';
+          const date = act.start_date ? new Date(act.start_date).toLocaleDateString() : 'N/A';
+          const dist = act.distance_km !== undefined ? `${act.distance_km.toFixed(2)} km` : 'N/A';
+          const dur = act.moving_time_min !== undefined ? `${act.moving_time_min.toFixed(1)} min` : 'N/A';
+          const pace = act.pace_or_speed || 'N/A';
+          const cal = act.calories ?? 'N/A';
+          const hr = act.average_heartrate ?? 'N/A';
+
+          const card = document.createElement('a');
+          card.href = `activity.html?id=${act.strava_id}`;
+          card.className = 'block bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition-shadow';
+
+          card.innerHTML = `
+            <h2 class="text-xl font-semibold mb-2">${name}</h2>
+            <p class="text-sm text-gray-500 mb-2">${type} • ${date}</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm mt-2">
+              <div><strong>Distanță:</strong><br>${dist}</div>
+              <div><strong>Durată:</strong><br>${dur}</div>
+              <div><strong>Viteză/Pace:</strong><br>${pace}</div>
+              <div><strong>Calorii:</strong><br>${cal}</div>
+              <div><strong>Puls mediu:</strong><br>${hr}</div>
+            </div>
+          `;
+
+          activitiesList.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error('Eroare:', error);
+        statusMessage.textContent = 'A apărut o eroare la încărcarea activităților.';
+        statusMessage.classList.remove('hidden');
+        activitiesList.innerHTML = '';
+      }
+    }
+  </script>
+</body>
+</html>

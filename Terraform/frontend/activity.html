@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detalii Activitate Strava</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+  <div class="max-w-4xl mx-auto p-6">
+    <h1 id="activityTitle" class="text-3xl font-bold mb-4 text-orange-600">Activitate</h1>
+
+    <!-- Rezumat -->
+    <div id="summary" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 bg-white p-4 rounded-lg shadow">
+      <!-- Aici vin detaliile din JS -->
+    </div>
+
+    <!-- Tabel Splituri -->
+    <h2 class="text-xl font-semibold mb-2">Splituri (pe kilometru)</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white rounded-lg shadow text-sm">
+        <thead>
+          <tr class="bg-orange-100 text-left">
+            <th class="p-2">#</th>
+            <th class="p-2">Distanta</th>
+            <th class="p-2">Timp</th>
+            <th class="p-2">Viteza</th>
+            <th class="p-2">Puls mediu</th>
+            <th class="p-2">Dif. altitudine</th>
+          </tr>
+        </thead>
+        <tbody id="splitsTable"></tbody>
+      </table>
+    </div>
+
+    <!-- Mesaj eroare -->
+    <div id="error" class="mt-6 text-center text-red-600 hidden"></div>
+
+    <a href="index.html" class="block mt-10 text-blue-500 text-sm">← Înapoi la activități</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const activityId = params.get("id");
+    const API_URL = `https://h35ja7q9hi.execute-api.eu-central-1.amazonaws.com/prod/activities/${activityId}`;
+
+    const titleEl = document.getElementById("activityTitle");
+    const summaryEl = document.getElementById("summary");
+    const splitsTable = document.getElementById("splitsTable");
+    const errorEl = document.getElementById("error");
+
+    async function loadActivity() {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("Nu s-a putut încărca activitatea.");
+
+        const { activity } = await res.json();
+
+        // Titlu
+        titleEl.textContent = activity.name || `Activitate ${activityId}`;
+
+        // Rezumat
+        const distKm = (parseFloat(activity.distance) / 1000).toFixed(2);
+        const timeMin = (parseFloat(activity.moving_time) / 60).toFixed(1);
+        const cal = activity.calories ?? 'N/A';
+        const hr = activity.average_heartrate ?? 'N/A';
+        const maxHr = activity.max_heartrate ?? 'N/A';
+        const type = activity.type || 'N/A';
+        const date = new Date(activity.start_date).toLocaleDateString();
+
+        summaryEl.innerHTML = `
+          <div><strong>Data</strong><br>${date}</div>
+          <div><strong>Tip</strong><br>${type}</div>
+          <div><strong>Distanta</strong><br>${distKm} km</div>
+          <div><strong>Durata</strong><br>${timeMin} min</div>
+          <div><strong>Puls</strong><br>${hr} bpm</div>
+          <div><strong>Puls max</strong><br>${maxHr} bpm</div>
+          <div><strong>Calorii</strong><br>${cal}</div>
+        `;
+
+        // Splituri (splits_metric)
+        const splits = activity.raw_payload?.splits_metric || [];
+        if (splits.length === 0) {
+          splitsTable.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">Fără splituri disponibile</td></tr>`;
+          return;
+        }
+
+        splits.forEach((split, i) => {
+          const row = document.createElement("tr");
+          row.className = i % 2 === 0 ? "bg-white" : "bg-gray-50";
+
+          row.innerHTML = `
+            <td class="p-2">${split.split}</td>
+            <td class="p-2">${(split.distance / 1000).toFixed(2)} km</td>
+            <td class="p-2">${(split.moving_time / 60).toFixed(1)} min</td>
+            <td class="p-2">${
+            activity.type.toLowerCase() === "run" || activity.type.toLowerCase() === "walk"
+                ? `${(16.6667 / parseFloat(split.average_speed)).toFixed(2)} min/km`
+                : `${(parseFloat(split.average_speed) * 3.6).toFixed(1)} km/h`
+            }</td>
+            <td class="p-2">${parseFloat(split.average_heartrate).toFixed(1)} bpm</td>
+            <td class="p-2">${split.elevation_difference || '0'} m</td>
+          `;
+
+          splitsTable.appendChild(row);
+        });
+      } catch (err) {
+        errorEl.textContent = "Eroare la încărcarea activității.";
+        errorEl.classList.remove("hidden");
+        console.error(err);
+      }
+    }
+
+    loadActivity();
+  </script>
+</body>
+</html>
